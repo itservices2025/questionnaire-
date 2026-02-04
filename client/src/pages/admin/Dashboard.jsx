@@ -157,37 +157,43 @@ export default function Dashboard() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 mt-auto pt-4 border-t border-white/10">
-                  <GlassButton
-                    variant="ghost"
-                    className="flex-1 text-sm py-2"
-                    onClick={() => navigate(`/admin/forms/${form.id}`)}
-                  >
-                    <FiEdit2 className="w-4 h-4" />
-                    Edit
-                  </GlassButton>
-                  <GlassButton
-                    variant="ghost"
-                    className="flex-1 text-sm py-2"
-                    onClick={() => navigate(`/admin/forms/${form.id}/responses`)}
-                  >
-                    <FiEye className="w-4 h-4" />
-                    Responses
-                  </GlassButton>
-                  <GlassButton
-                    variant="ghost"
-                    className="text-sm py-2 px-3"
-                    onClick={() => copyLink(form.slug)}
-                  >
-                    <FiCopy className="w-4 h-4" />
-                  </GlassButton>
-                  <GlassButton
-                    variant="ghost"
-                    className="text-sm py-2 px-3 text-red-400 hover:bg-red-500/20"
-                    onClick={() => setDeleteForm(form)}
-                  >
-                    <FiTrash2 className="w-4 h-4" />
-                  </GlassButton>
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+                  <div className="flex items-center gap-1">
+                    <GlassButton
+                      variant="ghost"
+                      className="text-sm !py-2 !px-4"
+                      onClick={() => navigate(`/admin/forms/${form.id}`)}
+                    >
+                      <FiEdit2 className="w-4 h-4" />
+                      <span>Edit</span>
+                    </GlassButton>
+                    <GlassButton
+                      variant="ghost"
+                      className="text-sm !py-2 !px-4"
+                      onClick={() => navigate(`/admin/forms/${form.id}/responses`)}
+                    >
+                      <FiEye className="w-4 h-4" />
+                      <span>Responses</span>
+                    </GlassButton>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <GlassButton
+                      variant="ghost"
+                      className="text-sm !py-2 !px-2.5"
+                      onClick={() => copyLink(form.slug)}
+                      title="Copy link"
+                    >
+                      <FiCopy className="w-4 h-4" />
+                    </GlassButton>
+                    <GlassButton
+                      variant="ghost"
+                      className="text-sm !py-2 !px-2.5 text-red-400 hover:bg-red-500/20"
+                      onClick={() => setDeleteForm(form)}
+                      title="Delete form"
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                    </GlassButton>
+                  </div>
                 </div>
               </GlassCard>
             ))}

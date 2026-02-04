@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
-import { FiMail, FiLock, FiLogIn } from 'react-icons/fi'
+import { FiMail, FiLock, FiLogIn, FiSun, FiMoon } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
-import { GlassCard, GlassInput, GlassButton } from '../../components/ui'
+import { useTheme } from '../../context/ThemeContext'
+import { GlassCard, GlassInput, GlassButton, Logo } from '../../components/ui'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
+  const { isDarkMode, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
@@ -27,9 +29,21 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      {/* Theme Toggle */}
+      <button
+        onClick={toggleTheme}
+        className="absolute top-4 right-4 p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all"
+        title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+      >
+        {isDarkMode ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
+      </button>
+
       <GlassCard className="w-full max-w-md">
         <div className="text-center mb-8">
+          <div className="flex justify-center mb-6">
+            <Logo size="large" />
+          </div>
           <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
           <p className="text-white/60">Sign in to manage your forms</p>
         </div>
