@@ -1,11 +1,7 @@
-version: '3.8'
-
 services:
   server:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: glass-questionnaire-server
+    image: personaltailscale/netra-forms-server:latest
+    container_name: netra-forms-server
     environment:
       - DATABASE_URL=file:/app/data/dev.db
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
@@ -14,24 +10,22 @@ services:
     volumes:
       - server-data:/app/data
     networks:
-      - glass-network
+      - netra-network
     restart: unless-stopped
 
   client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    container_name: glass-questionnaire-client
+    image: personaltailscale/netra-forms-client:latest
+    container_name: netra-forms-client
     ports:
       - "8080:80"
     depends_on:
       - server
     networks:
-      - glass-network
+      - netra-network
     restart: unless-stopped
 
 networks:
-  glass-network:
+  netra-network:
     driver: bridge
 
 volumes:
