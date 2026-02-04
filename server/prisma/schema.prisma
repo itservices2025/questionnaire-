@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  forms     Form[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Form {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  slug        String     @unique
+  isActive    Boolean    @default(true)
+  adminId     String
+  admin       Admin      @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  questions   Question[]
+  responses   Response[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  formId      String
+  form        Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  type        String   // text, textarea, email, phone, number, date, time, select, multiselect, radio, checkbox, rating, file
+  label       String
+  placeholder String?
+  helpText    String?
+  required    Boolean  @default(false)
+  options     String?  // JSON string for select/multiselect/radio options
+  validation  String?  // JSON string for validation rules (min, max, pattern, etc.)
+  order       Int      @default(0)
+  answers     Answer[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([formId, order])
+}
+
+model Response {
+  id          String   @id @default(cuid())
+  formId      String
+  form        Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  answers     Answer[]
+  submittedAt DateTime @default(now())
+  metadata    String?  // JSON string for IP, user agent, etc.
+
+  @@index([formId])
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  responseId String
+  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  value      String   // JSON string to support various types
+  createdAt  DateTime @default(now())
+
+  @@index([responseId])
+  @@index([questionId])
+}

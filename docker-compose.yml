@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: glass-questionnaire-server
+    environment:
+      - DATABASE_URL=file:/app/data/dev.db
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - PORT=3001
+      - NODE_ENV=production
+    volumes:
+      - server-data:/app/data
+    networks:
+      - glass-network
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: glass-questionnaire-client
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    networks:
+      - glass-network
+    restart: unless-stopped
+
+networks:
+  glass-network:
+    driver: bridge
+
+volumes:
+  server-data:
+    driver: local
