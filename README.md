@@ -1,14 +1,16 @@
-# Glass Questionnaire
+# NETRA Forms by Stoic DNC
 
 A beautiful full-stack questionnaire application with glassmorphism UI design.
 
 ![Glass UI](https://img.shields.io/badge/UI-Glassmorphism-blueviolet)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue)
+![Docker Hub](https://img.shields.io/badge/Docker%20Hub-Available-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ## Features
 
 - Beautiful glassmorphism UI design
+- Dark/Light mode toggle
+- Montserrat font throughout
 - 13 question types supported:
   - Short Text, Long Text, Email, Phone, Number
   - Date, Time, Dropdown, Multi-Select
@@ -19,63 +21,54 @@ A beautiful full-stack questionnaire application with glassmorphism UI design.
 - Excel export for responses
 - PDF receipt download for submissions
 - JWT authentication
-- Docker support for easy deployment
+- Docker Hub images for easy deployment
 
 ---
 
-## Quick Start with Docker Compose
+## Quick Start with Docker
 
-### Prerequisites
+### Option 1: Pull from Docker Hub (Recommended)
 
-- [Docker](https://docs.docker.com/get-docker/) (v20.10+)
-- [Docker Compose](https://docs.docker.com/compose/install/) (v2.0+)
+```bash
+# Create docker-compose.yml
+curl -O https://raw.githubusercontent.com/itservices2025/questionnaire-/main/docker-compose.yml
 
-### Step 1: Clone the Repository
+# Start the application
+docker compose up -d
+```
+
+### Option 2: Clone and Run
 
 ```bash
 git clone https://github.com/itservices2025/questionnaire-.git
 cd questionnaire-
+docker compose up -d
 ```
 
-### Step 2: Create Environment File
-
-```bash
-cp example.env .env
-```
-
-Edit `.env` file and set a secure JWT secret:
-
-```bash
-nano .env
-# or
-vim .env
-```
-
-### Step 3: Build and Start Containers
-
-```bash
-docker compose up -d --build
-```
-
-This will:
-- Build the frontend (React + Nginx)
-- Build the backend (Node.js + Express)
-- Create a SQLite database with persistent storage
-- Start both services
-
-### Step 4: Access the Application
+### Access the Application
 
 | Service | URL |
 |---------|-----|
 | **Web App** | http://localhost:8080 |
 | **API Health** | http://localhost:8080/api/health |
 
-### Step 5: Create Your First Admin Account
+### Create Your First Admin Account
 
 1. Open http://localhost:8080
 2. Click "Sign up"
 3. Enter your name, email, and password
 4. Start creating forms!
+
+---
+
+## Docker Images
+
+Available on Docker Hub:
+
+| Image | Pull Command |
+|-------|--------------|
+| **Client** | `docker pull personaltailscale/netra-forms-client:latest` |
+| **Server** | `docker pull personaltailscale/netra-forms-server:latest` |
 
 ---
 
@@ -103,15 +96,10 @@ docker compose logs -f server
 docker compose logs -f client
 ```
 
-### Rebuild after code changes
-```bash
-docker compose up -d --build
-```
-
 ### Reset database (delete all data)
 ```bash
 docker compose down -v
-docker compose up -d --build
+docker compose up -d
 ```
 
 ### Check container status
@@ -146,12 +134,14 @@ client:
 ## Project Structure
 
 ```
-glass-questionnaire/
+netra-forms/
 ├── client/                 # React frontend
 │   ├── src/
-│   │   ├── components/     # UI & question components
-│   │   ├── pages/          # Page components
-│   │   ├── context/        # Auth context
+│   │   ├── components/
+│   │   │   ├── ui/         # Glass UI components + Logo
+│   │   │   └── questions/  # 13 question type renderers
+│   │   ├── pages/          # Auth, Admin, Public pages
+│   │   ├── context/        # AuthContext, ThemeContext
 │   │   └── api/            # API client
 │   ├── Dockerfile
 │   └── nginx.conf
@@ -162,7 +152,6 @@ glass-questionnaire/
 │   ├── prisma/             # Database schema
 │   └── Dockerfile
 ├── docker-compose.yml
-├── example.env
 └── README.md
 ```
 
@@ -172,11 +161,11 @@ glass-questionnaire/
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | React 18, Vite, TailwindCSS, React Router v6, React Query |
+| **Frontend** | React 18, Vite, TailwindCSS, Montserrat Font, React Router v6, React Query |
 | **Backend** | Node.js, Express.js |
 | **Database** | SQLite + Prisma ORM |
 | **Export** | ExcelJS (Excel), jsPDF (PDF) |
-| **Deployment** | Docker, Nginx |
+| **Deployment** | Docker, Nginx, Docker Hub |
 
 ---
 
@@ -257,7 +246,7 @@ lsof -i :8080
 ```bash
 # Reset everything
 docker compose down -v
-docker compose up -d --build
+docker compose up -d
 ```
 
 ---
