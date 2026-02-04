@@ -27,3 +27,18 @@ npm-debug.log*
 # Misc
 .cache/
 tmp/
+# Security: Never upload SSH keys
+Rohit
+Rohit.pub
+id_ed25519
+*.pem
+*.key
+
+# Environments & Passwords
+.env
+.DS_Store
+
+# Dependencies (if you're using Node.js)
+node_modules/
+dist/
+build/
