@@ -1,5 +1,6 @@
 import TextQuestion from './TextQuestion'
 import TextareaQuestion from './TextareaQuestion'
+import NameQuestion from './NameQuestion'
 import EmailQuestion from './EmailQuestion'
 import PhoneQuestion from './PhoneQuestion'
 import NumberQuestion from './NumberQuestion'
@@ -15,6 +16,7 @@ import FileQuestion from './FileQuestion'
 const questionComponents = {
   text: TextQuestion,
   textarea: TextareaQuestion,
+  name: NameQuestion,
   email: EmailQuestion,
   phone: PhoneQuestion,
   number: NumberQuestion,
@@ -52,8 +54,9 @@ export default function QuestionRenderer({ question, value, onChange, error }) {
 export const QUESTION_TYPES = [
   { value: 'text', label: 'Short Text', icon: 'Aa' },
   { value: 'textarea', label: 'Long Text', icon: '¶' },
+  { value: 'name', label: 'Name', icon: '👤' },
   { value: 'email', label: 'Email', icon: '@' },
-  { value: 'phone', label: 'Phone', icon: '☎' },
+  { value: 'phone', label: 'Phone Number', icon: '☎' },
   { value: 'number', label: 'Number', icon: '#' },
   { value: 'date', label: 'Date', icon: '📅' },
   { value: 'time', label: 'Time', icon: '🕐' },

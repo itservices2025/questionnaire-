@@ -1,6 +1,7 @@
 export { default as QuestionRenderer, QUESTION_TYPES } from './QuestionRenderer'
 export { default as TextQuestion } from './TextQuestion'
 export { default as TextareaQuestion } from './TextareaQuestion'
+export { default as NameQuestion } from './NameQuestion'
 export { default as EmailQuestion } from './EmailQuestion'
 export { default as PhoneQuestion } from './PhoneQuestion'
 export { default as NumberQuestion } from './NumberQuestion'

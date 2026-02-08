@@ -8,6 +8,7 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiCalendar,
+  FiFile,
 } from 'react-icons/fi'
 import api from '../../api/client'
 import { GlassNavbar, GlassCard, GlassButton } from '../../components/ui'
@@ -57,7 +58,42 @@ export default function FormResponses() {
       const value = JSON.parse(answer.value)
       if (Array.isArray(value)) return value.join(', ')
       if (typeof value === 'boolean') return value ? 'Yes' : 'No'
-      if (typeof value === 'object' && value.name) return value.name // File
+      // R2 file with download URL
+      if (typeof value === 'object' && value.fileKey && value.downloadUrl) {
+        return (
+          <a
+            href={value.downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 underline"
+          >
+            <FiFile className="w-4 h-4" />
+            {value.fileName || 'Download file'}
+          </a>
+        )
+      }
+      // Legacy base64 file
+      if (typeof value === 'object' && value.name && value.data) {
+        return (
+          <a
+            href={value.data}
+            download={value.name}
+            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 underline"
+          >
+            <FiFile className="w-4 h-4" />
+            {value.name}
+          </a>
+        )
+      }
+      // Name field (firstName + lastName)
+      if (typeof value === 'object' && value.firstName !== undefined) {
+        return [value.firstName, value.lastName].filter(Boolean).join(' ') || '-'
+      }
+      // Phone field (countryCode + number)
+      if (typeof value === 'object' && value.countryCode !== undefined) {
+        return value.number ? `${value.countryCode} ${value.number}` : '-'
+      }
+      if (typeof value === 'object' && value.name) return value.name
       return String(value)
     } catch {
       return answer.value

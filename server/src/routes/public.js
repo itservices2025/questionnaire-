@@ -2,6 +2,8 @@ import express from 'express'
 import { body, param } from 'express-validator'
 import { PrismaClient } from '@prisma/client'
 import { validate } from '../middleware/validate.js'
+import { getPresignedDownloadUrl } from '../services/r2.js'
+import { sendSubmissionEmails } from '../services/email.js'
 
 const router = express.Router()
 const prisma = new PrismaClient()
@@ -73,12 +75,22 @@ router.post(
       form.questions.forEach(q => {
         if (q.required) {
           const answer = answers[q.id]
-          if (
+          let isEmpty =
             answer === undefined ||
             answer === null ||
             answer === '' ||
             (Array.isArray(answer) && answer.length === 0)
-          ) {
+
+          // Name type: require at least firstName
+          if (!isEmpty && q.type === 'name' && typeof answer === 'object') {
+            isEmpty = !answer.firstName?.trim()
+          }
+          // Phone type: require number
+          if (!isEmpty && q.type === 'phone' && typeof answer === 'object') {
+            isEmpty = !answer.number?.trim()
+          }
+
+          if (isEmpty) {
             errors.push({ field: q.id, message: `${q.label} is required` })
           }
         }
@@ -115,6 +127,34 @@ router.post(
         },
       })
 
+      // Fire-and-forget: send submission emails to admin + respondent
+      ;(async () => {
+        try {
+          const admin = await prisma.admin.findUnique({ where: { id: form.adminId }, select: { email: true } })
+          if (!admin) return
+
+          // Try to find respondent email from an email-type question answer
+          const emailQuestion = form.questions.find(q => q.type === 'email')
+          let respondentEmail = null
+          if (emailQuestion && answers[emailQuestion.id]) {
+            const val = answers[emailQuestion.id]
+            if (typeof val === 'string' && val.includes('@')) respondentEmail = val
+          }
+
+          await sendSubmissionEmails({
+            adminEmail: admin.email,
+            respondentEmail,
+            formTitle: form.title,
+            questions: form.questions,
+            answers: response.answers,
+            submittedAt: response.submittedAt,
+            responseId: response.id,
+          })
+        } catch (err) {
+          console.error('[EMAIL] Failed to send submission emails:', err.message)
+        }
+      })()
+
       res.status(201).json({
         message: 'Response submitted successfully',
         response: {
@@ -147,21 +187,42 @@ router.get('/responses/:id', async (req, res, next) => {
     }
 
     // Format response for receipt
-    const formattedAnswers = response.answers
-      .sort((a, b) => a.question.order - b.question.order)
-      .map(answer => {
-        let value
-        try {
-          value = JSON.parse(answer.value)
-          if (Array.isArray(value)) value = value.join(', ')
-        } catch {
-          value = answer.value
-        }
-        return {
-          question: answer.question.label,
-          answer: value,
-        }
-      })
+    const formattedAnswers = await Promise.all(
+      response.answers
+        .sort((a, b) => a.question.order - b.question.order)
+        .map(async (answer) => {
+          let value
+          try {
+            value = JSON.parse(answer.value)
+            if (Array.isArray(value)) value = value.join(', ')
+            // Format name objects for display
+            if (answer.question.type === 'name' && typeof value === 'object') {
+              value = [value.firstName, value.lastName].filter(Boolean).join(' ')
+            }
+            // Format phone objects for display
+            if (answer.question.type === 'phone' && typeof value === 'object') {
+              value = value.number ? `${value.countryCode} ${value.number}` : ''
+            }
+          } catch {
+            value = answer.value
+          }
+
+          // Generate presigned download URL for R2-stored files
+          if (answer.question.type === 'file' && value && typeof value === 'object' && value.fileKey) {
+            try {
+              value.downloadUrl = await getPresignedDownloadUrl(value.fileKey)
+            } catch {
+              // If R2 is unavailable, return without download URL
+            }
+          }
+
+          return {
+            question: answer.question.label,
+            type: answer.question.type,
+            answer: value,
+          }
+        })
+    )
 
     res.json({
       receipt: {

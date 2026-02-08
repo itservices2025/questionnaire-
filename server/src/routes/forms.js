@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import ExcelJS from 'exceljs'
 import { validate } from '../middleware/validate.js'
 import { authenticate } from '../middleware/auth.js'
+import { getPresignedDownloadUrl } from '../services/r2.js'
 
 const router = express.Router()
 const prisma = new PrismaClient()
@@ -204,6 +205,29 @@ router.get('/:id/responses', async (req, res, next) => {
       return res.status(404).json({ error: 'Form not found' })
     }
 
+    // Generate presigned download URLs for file-type answers
+    const fileQuestionIds = new Set(
+      form.questions.filter(q => q.type === 'file').map(q => q.id)
+    )
+
+    if (fileQuestionIds.size > 0) {
+      for (const response of form.responses) {
+        for (const answer of response.answers) {
+          if (fileQuestionIds.has(answer.questionId)) {
+            try {
+              const parsed = JSON.parse(answer.value)
+              if (parsed && typeof parsed === 'object' && parsed.fileKey) {
+                parsed.downloadUrl = await getPresignedDownloadUrl(parsed.fileKey)
+                answer.value = JSON.stringify(parsed)
+              }
+            } catch {
+              // Not a JSON file answer, skip
+            }
+          }
+        }
+      }
+    }
+
     res.json({ form })
   } catch (error) {
     next(error)
@@ -260,7 +284,17 @@ router.get('/:id/export', async (req, res, next) => {
         if (answer) {
           try {
             const parsed = JSON.parse(answer.value)
-            value = Array.isArray(parsed) ? parsed.join(', ') : String(parsed)
+            if (Array.isArray(parsed)) {
+              value = parsed.join(', ')
+            } else if (question.type === 'name' && typeof parsed === 'object') {
+              value = [parsed.firstName, parsed.lastName].filter(Boolean).join(' ')
+            } else if (question.type === 'phone' && typeof parsed === 'object') {
+              value = parsed.number ? `${parsed.countryCode} ${parsed.number}` : ''
+            } else if (question.type === 'file' && typeof parsed === 'object') {
+              value = parsed.fileName || parsed.name || '[file]'
+            } else {
+              value = String(parsed)
+            }
           } catch {
             value = answer.value
           }

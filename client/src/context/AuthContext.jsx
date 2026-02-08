@@ -26,6 +26,11 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password })
+    return data // { pendingId, message }
+  }
+
+  const verifyLogin = async (pendingId, otp) => {
+    const { data } = await api.post('/auth/verify-login', { pendingId, otp })
     localStorage.setItem('token', data.token)
     localStorage.setItem('admin', JSON.stringify(data.admin))
     setAdmin(data.admin)
@@ -34,9 +39,19 @@ export function AuthProvider({ children }) {
 
   const register = async (name, email, password) => {
     const { data } = await api.post('/auth/register', { name, email, password })
+    return data // { pendingId, message }
+  }
+
+  const verifyRegister = async (pendingId, otp) => {
+    const { data } = await api.post('/auth/verify-register', { pendingId, otp })
     localStorage.setItem('token', data.token)
     localStorage.setItem('admin', JSON.stringify(data.admin))
     setAdmin(data.admin)
+    return data
+  }
+
+  const resendOtp = async (pendingId) => {
+    const { data } = await api.post('/auth/resend-otp', { pendingId })
     return data
   }
 
@@ -47,7 +62,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ admin, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ admin, loading, login, verifyLogin, register, verifyRegister, resendOtp, logout }}>
       {children}
     </AuthContext.Provider>
   )

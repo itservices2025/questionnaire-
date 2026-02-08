@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import authRoutes from './routes/auth.js'
 import formRoutes from './routes/forms.js'
 import publicRoutes from './routes/public.js'
+import uploadRoutes from './routes/upload.js'
 
 dotenv.config()
 
@@ -12,12 +13,13 @@ const PORT = process.env.PORT || 3001
 
 // Middleware
 app.use(cors())
-app.use(express.json())
+app.use(express.json({ limit: '1mb' }))
 
 // Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/forms', formRoutes)
 app.use('/api/public', publicRoutes)
+app.use('/api/upload', uploadRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {
