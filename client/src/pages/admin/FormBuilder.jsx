@@ -341,6 +341,25 @@ function QuestionModal({ isOpen, onClose, onSave, question, title }) {
   }, [question, isOpen])
 
   const needsOptions = ['select', 'multiselect', 'radio'].includes(type)
+  const hasPlaceholder = ['text', 'textarea', 'email', 'number'].includes(type)
+
+  // Type-specific placeholder for the label field
+  const labelPlaceholders = {
+    text: 'e.g., What is your name?',
+    textarea: 'e.g., Tell us about yourself',
+    name: 'e.g., Full Name',
+    email: 'e.g., Email Address',
+    phone: 'e.g., Phone Number',
+    number: 'e.g., Age',
+    date: 'e.g., Date of Birth',
+    time: 'e.g., Preferred Time',
+    select: 'e.g., Select your country',
+    multiselect: 'e.g., Select your skills',
+    radio: 'e.g., Gender',
+    checkbox: 'e.g., I agree to the terms',
+    rating: 'e.g., Rate your experience',
+    file: 'e.g., Upload your resume',
+  }
 
   const handleSave = () => {
     if (!label.trim()) {
@@ -400,16 +419,18 @@ function QuestionModal({ isOpen, onClose, onSave, question, title }) {
           label="Question Label"
           value={label}
           onChange={(e) => setLabel(e.target.value)}
-          placeholder="e.g., What is your name?"
+          placeholder={labelPlaceholders[type] || 'e.g., Your question here'}
           required
         />
 
-        <GlassInput
-          label="Placeholder Text"
-          value={placeholder}
-          onChange={(e) => setPlaceholder(e.target.value)}
-          placeholder="Optional placeholder"
-        />
+        {hasPlaceholder && (
+          <GlassInput
+            label="Placeholder Text"
+            value={placeholder}
+            onChange={(e) => setPlaceholder(e.target.value)}
+            placeholder="Optional placeholder"
+          />
+        )}
 
         <GlassInput
           label="Help Text"
